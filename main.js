@@ -72,24 +72,25 @@ var combinedReducers = ee.Reducer.mean().combine({
 });
 
 // Use the combined reducer to get the mean and SD of the image.
-function reducer(image){
-  return image.reduce({
-  reducer: combinedReducers
+function reducer(image, radius){
+  return image.reduceNeighborhood({
+  reducer: combinedReducers,
+  kernel: ee.Kernel.circle(radius, 'meters')
 })}
 
-// Aggregate Height data
+// Aggregate Height data by mean and SD
 var onehundredReducedheight = reducer(onehundredHeight, onehundredBuffer);
 var threehundredReducedheight = reducer(threehundredHeight, threehundredBuffer);
 var fivehundredReducedheight = reducer(fivehundredHeight, fivehundredBuffer);
 var onethousantReducedheight = reducer(onethousandHeight, onethousandBuffer);
 
-// Aggregate Desnity data
+// Aggregate Desnity data by mean and SD
 var onehundredReduceddensity = reducer(onehundredDensity, onehundredBuffer);
 var threehundredReduceddensity = reducer(threehundredDensity, threehundredBuffer);
 var fivehundredReduceddensity = reducer(fivehundredDensity, fivehundredBuffer);
 var onethousantReduceddensity = reducer(onethousantDensity, onethousandBuffer);
 
-// Aggregate Vertical Profile data
+// Aggregate Vertical Profile data by mean and SD
 var onehundredReducedVP = reducer(onehundredVP, onehundredBuffer);
 var threehundredReducedVP = reducer(threehundredVP, threehundredBuffer);
 var fivehundredReducedVP = reducer(fivehundredVP, fivehundredBuffer);
