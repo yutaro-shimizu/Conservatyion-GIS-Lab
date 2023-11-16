@@ -131,13 +131,5 @@ var fivehundredReducedVP = reducer(fivehundredVP, fivehundredBuffer);
 var onethousantReducedVP = reducer(onethousandVP, onethousandBuffer);
 print(onethousantReducedVP)
 ///////////////////////////////////////////////////////////////
-//            5) Export the aggregated data               //
+//            5) Visualize the aggregated data               //
 ///////////////////////////////////////////////////////////////
-function export_helper(image, imagebuffer){
-Export.image.toAsset({
-  image: image,
-  description: image,
-  assetId: image,
-  crs: projection.crs,
-  crsTransform: projection.transform
-})}
