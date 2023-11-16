@@ -44,21 +44,14 @@ var onethousandBuffer = smithsCoords.buffer(1000); // 1000 meter radius
 Map.addLayer(smithsCoords, {color:'a70000'}, 'coordinates'); // Display coordinates from the PointCoordinates sheet
 Map.centerObject(smithsCoords,5);
 
-// Visualize buffers on the map
-Map.addLayer(onehundredBuffer, {color:'ff0000'}, '100 meter buffer'); // Add 100 meter buffer
-Map.addLayer(threehundredBuffer, {color:'ff5252'}, '300 meter buffer'); // Add 300 meter buffer
-Map.addLayer(fivehundredBuffer, {color:'ff7b7b'}, '500 meter buffer'); // Add 500 meter buffer
-Map.addLayer(onethousandBuffer, {color:'ffbaba'}, '1000 meter buffer'); // Add 1000 meter buffer
-
-
 ///////////////////////////////////////////////////////////////
-//            3) Filter data with the buffers                //
+//            3) Aggregate data                              //
 ///////////////////////////////////////////////////////////////
 // Filter Height data
-var onehundredHeight = gediHeight.filterBounds(onehundredBuffer);
-var threehundredHeight = gediHeight.filterBounds(threehundredBuffer);
-var fivehundredHeight = gediHeight.filterBounds(fivehundredBuffer);
-var onethousandHeight = gediHeight.filterBounds(onethousandBuffer);
+var onehundredHeight = gediHeight.select(['rh50','rh100']).filterBounds(onehundredBuffer);
+var threehundredHeight = gediHeight.select(['rh50','rh100']).filterBounds(threehundredBuffer);
+var fivehundredHeight = gediHeight.select(['rh50','rh100']).filterBounds(fivehundredBuffer);
+var onethousandHeight = gediHeight.select(['rh50','rh100']).filterBounds(onethousandBuffer);
 
 // Filter Density data
 var onehundredDensity = gediDensity.filterBounds(onehundredBuffer);
@@ -71,34 +64,6 @@ var onehundredVP = gediVerticalProfile.filterBounds(onehundredBuffer);
 var threehundredVP = gediVerticalProfile.filterBounds(threehundredBuffer);
 var fivehundredVP = gediVerticalProfile.filterBounds(fivehundredBuffer);
 var onethousandVP = gediVerticalProfile.filterBounds(onethousandBuffer);
-
-// Display the location of data points
-// Set visualization parameters
-var gediVis = {
-  bands:['rh100'], // visualize the height of top canopy
-  min: 1,
-  max: 60,
-  palette: 'darkred,red,orange,green,darkgreen',
-};
-
-// Only add Height dataset, as the other two are just processed differently with identical locations 
-// Clip to show only the data points within the buffers.
-Map.addLayer(onehundredHeight.median().clip(onehundredBuffer), 
-             gediVis, 
-             'Canopy 100 meter'); // Add 100 meter buffer
-Map.addLayer(threehundredHeight.median().clip(threehundredBuffer), 
-             gediVis, 
-             'Canopy 300 meter'); // Add 300 meter buffer
-Map.addLayer(fivehundredHeight.median().clip(fivehundredBuffer), 
-             gediVis, 
-             'Canopy 500 meter'); // Add 500 meter buffer
-Map.addLayer(onethousandHeight.median().clip(onethousandBuffer), 
-             gediVis, 
-             'Canopy 1000 meter'); // Add 1000 meter buffer
-
-///////////////////////////////////////////////////////////////
-//            4) Aggregate image collection by buffer        //
-///////////////////////////////////////////////////////////////
 
 // Combine the mean and standard deviation reducers.
 var combinedReducers = ee.Reducer.mean().combine({
@@ -129,7 +94,51 @@ var onehundredReducedVP = reducer(onehundredVP, onehundredBuffer);
 var threehundredReducedVP = reducer(threehundredVP, threehundredBuffer);
 var fivehundredReducedVP = reducer(fivehundredVP, fivehundredBuffer);
 var onethousantReducedVP = reducer(onethousandVP, onethousandBuffer);
-print(onethousantReducedVP)
+
 ///////////////////////////////////////////////////////////////
-//            5) Visualize the aggregated data               //
+//            4) Visualize the aggregated data               //
 ///////////////////////////////////////////////////////////////
+
+// Display the location of data points
+// Set visualization parameters
+var heightMean = {
+  bands:['rh100_mean'], // visualize the height of top canopy
+  min: onehundredReducedheight.select(['rh100_mean']).min(),
+  max: onehundredReducedheight.select(['rh100_mean']).max(),
+  palette: 'darkred,red,orange,green,darkgreen',
+};
+
+var gediVis = {
+  bands:['rh100_stdDev'], // visualize the height of top canopy
+  min: onehundredReducedheight.select(['rh100_mean']).min(),
+  max: onehundredReducedheight.select(['rh100_mean']).max(),
+  palette: 'darkred,red,orange,green,darkgreen',
+};
+
+// Clip to show only the data points within the buffers.
+// Mean top of canopy (RH100=Height at whuch 100% of the waveform has been returned)
+Map.addLayer(onehundredReducedheight.clip(onehundredBuffer), 
+             heightMean, 
+             'Mean Top Canopy Height 100 meter'); // Add 100 meter buffer
+Map.addLayer(threehundredReducedheight.clip(threehundredBuffer), 
+             heightMean, 
+             'Mean Top Canopy Height 300 meter'); // Add 300 meter buffer
+Map.addLayer(fivehundredReducedheight.clip(fivehundredBuffer), 
+             heightMean, 
+             'Mean Top Canopy Height 500 meter'); // Add 500 meter buffer
+Map.addLayer(onethousantReducedheight.clip(onethousandBuffer), 
+             heightMean, 
+             'Mean Top Canopy Height 1000 meter'); // Add 1000 meter buffer
+             
+Map.addLayer(onehundredReducedheight.clip(onehundredBuffer), 
+             heightMean, 
+             'StdDev Top Canopy Height 100 meter'); // Add 100 meter buffer
+Map.addLayer(threehundredReducedheight.clip(threehundredBuffer), 
+             heightMean, 
+             'StdDev Top Canopy Height 300 meter'); // Add 300 meter buffer
+Map.addLayer(fivehundredReducedheight.clip(fivehundredBuffer), 
+             heightMean, 
+             'StdDev Top Canopy Height 500 meter'); // Add 500 meter buffer
+Map.addLayer(onethousantReducedheight.clip(onethousandBuffer), 
+             heightMean, 
+             'StdDev Top Canopy Height 1000 meter'); // Add 1000 meter buffer
